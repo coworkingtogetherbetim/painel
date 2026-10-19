@@ -159,7 +159,8 @@ img{max-width:100%}
 @media (max-width:900px){.kpis.k6,.ind{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:560px){.kpis.k6,.ind{grid-template-columns:1fr}.band .btn{flex:1}}
 /* ---------- relatório PDF (sempre tema claro) ---------- */
-#rel{position:absolute;left:-10000px;top:0;width:760px;background:#fff;color:#1A2340;font-family:"Barlow","Segoe UI",Arial,sans-serif;font-size:11.5px;line-height:1.35}
+#rel-host{position:absolute;left:-10000px;top:0}
+#rel{width:690px;background:#fff;color:#1A2340;font-family:"Barlow","Segoe UI",Arial,sans-serif;font-size:11.5px;line-height:1.35}
 #rel .rh{display:flex;align-items:center;gap:16px;background:#1F326A;color:#fff;padding:14px 18px;border-radius:8px}
 #rel .rh .lg{background:#fff;border-radius:6px;padding:4px 8px}
 #rel .rh .lg img{height:34px;display:block}
@@ -181,6 +182,7 @@ img{max-width:100%}
 #rel tr.sub td{color:#4A5370;font-size:10.5px}
 #rel tr.sub td:first-child{padding-left:16px}
 #rel .neg{color:#C2412D}
+#rel td.lb{text-align:left;padding-left:18px}
 #rel .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 #rel .bx{display:inline-block;height:7px;border-radius:0 3px 3px 0;vertical-align:middle;margin-right:6px}
 #rel .ft{margin-top:14px;font-size:9.5px;color:#7A8199;border-top:1px solid #DCE1EA;padding-top:6px;display:flex;justify-content:space-between}
@@ -273,7 +275,7 @@ img{max-width:100%}
   </div>
 </main>
 
-<div id="rel" aria-hidden="true"></div>
+<div id="rel-host" aria-hidden="true"><div id="rel"></div></div>
 <div class="toast" id="toast" hidden></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -635,12 +637,11 @@ function montarRelatorio(){
   <h2>DRE gerencial</h2>${dreH}
   <h2>Indicadores financeiros</h2>
   <table class="avoid"><tbody>
-    <tr><td>Margem líquida</td><td>${pct(I.margemLiq,1)}</td><td>Margem EBITDA</td><td>${pct(I.margemEbitda,1)}</td></tr>
-    <tr><td>Carga tributária</td><td>${pct(I.carga,1)}</td><td>Ponto de equilíbrio (receita/mês)</td><td>${brl(I.peMes)}</td></tr>
-    <tr><td>Margem de segurança</td><td>${pct(I.seguranca,1)}</td><td>Receita realizada ÷ projetada</td><td>${pct(I.aproveit,1)}</td></tr>
-    ${ret?`<tr><td>Retiradas de lucro no período</td><td>${brl2(ret)}</td><td>Saldo após retiradas</td><td class="${d.saldo<0?'neg':''}">${brl2(d.saldo)}</td></tr>`:''}
+    <tr><td>Margem líquida</td><td>${pct(I.margemLiq,1)}</td><td class="lb">Margem EBITDA</td><td>${pct(I.margemEbitda,1)}</td></tr>
+    <tr><td>Carga tributária</td><td>${pct(I.carga,1)}</td><td class="lb">Ponto de equilíbrio (receita/mês)</td><td>${brl(I.peMes)}</td></tr>
+    <tr><td>Margem de segurança</td><td>${pct(I.seguranca,1)}</td><td class="lb">Receita realizada ÷ projetada</td><td>${pct(I.aproveit,1)}</td></tr>
+    ${ret?`<tr><td>Retiradas de lucro no período</td><td>${brl2(ret)}</td><td class="lb">Saldo após retiradas</td><td class="${d.saldo<0?'neg':''}">${brl2(d.saldo)}</td></tr>`:''}
   </tbody></table>
-  <div class="pb"></div>
   <div class="two">
     <div class="avoid"><h2>Receita por tipo de serviço</h2>${tb(recT,mxR,'#1F8FAD',d.bruta)}</div>
     <div class="avoid"><h2>Despesas por categoria</h2>${tb(despT,mxD,'#E08A1E',desp)}</div>
@@ -670,7 +671,7 @@ async function gerarPDF(){
     const {el} = montarRelatorio();
     const nome = periodo==='ano' ? `Relatorio-Coworking-Acumulado-${MS[0]}-${MS[lastFull]}-2026.pdf` : `Relatorio-Coworking-${norm(M[+periodo]).replace(/ /g,'-')}-2026.pdf`;
     await html2pdf().set({margin:[10,10,12,10], filename:nome, image:{type:'jpeg',quality:0.96},
-      html2canvas:{scale:2, useCORS:true, backgroundColor:'#ffffff', windowWidth:800},
+      html2canvas:{scale:2, useCORS:true, backgroundColor:'#ffffff', scrollX:0, scrollY:0},
       jsPDF:{unit:'mm', format:'a4', orientation:'portrait'}, pagebreak:{mode:['css','legacy'], avoid:['tr','.avoid']}}).from(el).save();
     toast('PDF gerado: '+nome);
   }catch(e){ console.error(e); toast('Não foi possível gerar o PDF: '+e.message,6000); }
